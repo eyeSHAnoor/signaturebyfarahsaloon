@@ -36,12 +36,13 @@ const unreadCount = computed(() => liveNotifications.value.filter(n => !n.read_a
 onMounted(() => {
     if (!userId.value) return;
 
-    if (!window.Echo) {
+    const echo = window.Echo;
+    if (!echo) {
         console.warn('Echo not initialized!');
         return;
     }
 
-    window.Echo.channel('notifications')
+    echo.channel('notifications')
         .listen('.notification.created', (data: any) => {
             // console.log('Received notification:', data);
 

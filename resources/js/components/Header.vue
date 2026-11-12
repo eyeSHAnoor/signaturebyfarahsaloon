@@ -290,11 +290,12 @@ watch(showNotifications, async (newVal) => {
 
 // Echo setup
 const setupEchoListeners = () => {
-    if (!user.value || !window.Echo || echoInitialized.value) return
+    const echo = window.Echo
+    if (!user.value || !echo || echoInitialized.value) return
 
     const userId = user.value.id
     try {
-        window.Echo.private(`App.Models.User.${userId}`).notification((notification: any) => {
+        echo.private(`App.Models.User.${userId}`).notification((notification: any) => {
             if (Notification.permission === "granted") {
                 new Notification("New Notification", {
                     body: notification.message || notification.body || "You have a new notification",
@@ -304,8 +305,8 @@ const setupEchoListeners = () => {
             refreshNotifications()
         })
 
-        if (window.Echo.connector?.pusher?.connection) {
-            window.Echo.connector.pusher.connection.bind("connected", () => {
+        if (echo.connector?.pusher?.connection) {
+            echo.connector.pusher.connection.bind("connected", () => {
                 echoInitialized.value = true
             })
         }
@@ -322,9 +323,10 @@ onMounted(() => {
 })
 
 watch(user, (newUser, oldUser) => {
-    if (oldUser && window.Echo) {
+    const echo = window.Echo
+    if (oldUser && echo) {
         try {
-            window.Echo.leave(`App.Models.User.${oldUser.id}`)
+            echo.leave(`App.Models.User.${oldUser.id}`)
         } catch (error) {
             console.error("Error leaving channel:", error)
         }
@@ -336,9 +338,10 @@ watch(user, (newUser, oldUser) => {
 })
 
 onUnmounted(() => {
-    if (user.value && window.Echo) {
+    const echo = window.Echo
+    if (user.value && echo) {
         try {
-            window.Echo.leave(`App.Models.User.${user.value.id}`)
+            echo.leave(`App.Models.User.${user.value.id}`)
         } catch (error) {
             console.error("Error leaving channel:", error)
         }

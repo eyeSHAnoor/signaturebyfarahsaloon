@@ -15,22 +15,14 @@ export const useNotifications = () => {
     const unreadCount = computed(() => notifications.value.filter(n => !n.read_at).length);
 
     onMounted(() => {
-        if (!userId.value) return;
+        const echo = window.Echo;
+        if (!userId.value || !echo) return;
 
-        // Wait for Echo to be initialized
-        const waitForEcho = setInterval(() => {
-            if (window.Echo) {
-                clearInterval(waitForEcho);
-
-                window.Echo.channel('notifications')
-                    .listen('.notification.created', (data: any) => {
-                        // console.log('Received:', data);
-
-                        notifications.value.unshift({ ...data, read_at: null });
-                        toast({ title: data.title, description: data.message, duration: 5000 });
-                    });
-            }
-        }, 100);
+        echo.channel('notifications')
+            .listen('.notification.created', (data: any) => {
+                notifications.value.unshift({ ...data, read_at: null });
+                toast({ title: data.title, description: data.message, duration: 5000 });
+            });
     });
 
     return {
