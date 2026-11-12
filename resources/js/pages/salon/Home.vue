@@ -15,7 +15,7 @@ defineProps<{
 
 <template>
 
-    <Head title="Signature by Farah | Beauty Salon in Lahore" />
+    <Head title="Signature by Farah | Beauty Salon in Faisalabad" />
     <section class="relative min-h-[620px] overflow-hidden bg-[#40352e] md:min-h-[690px]">
         <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=2200&q=90"
             alt="A sunlit beauty studio" class="absolute inset-0 h-full w-full object-cover object-center opacity-60">
@@ -40,7 +40,7 @@ defineProps<{
         </div>
         <div
             class="absolute right-8 bottom-8 hidden text-[9px] tracking-[0.25em] text-white/70 [writing-mode:vertical-rl] md:block">
-            LAHORE · EST. 2016</div>
+            FAISALABAD · EST. 2016</div>
     </section>
 
     <section class="bg-[#e9e1d7] px-6 py-10 lg:px-10">
@@ -204,7 +204,7 @@ defineProps<{
                     <p class="text-sm tracking-[0.2em] text-[#c6a575]">{{ '★'.repeat(review.rating) }}</p>
                     <p class="mt-5 font-serif text-xl leading-8 italic text-[#f1e9df]">“{{ review.quote }}”</p>
                     <p class="mt-7 text-[10px] tracking-[0.15em] text-[#c6a575]">{{ review.customer_name.toUpperCase()
-                        }}</p>
+                    }}</p>
                 </article>
                 <p v-if="testimonials.length === 0" class="col-span-full text-center text-sm text-[#c6a575]">Lovely
                     words from our guests are coming soon.</p>

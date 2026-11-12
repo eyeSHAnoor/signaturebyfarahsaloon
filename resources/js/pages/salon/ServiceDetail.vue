@@ -11,7 +11,7 @@ defineProps<{
 </script>
 
 <template>
-    <Head :title="`${service.name} | Signature by Farah Lahore`" />
+    <Head :title="`${service.name} | Signature by Farah Faisalabad`" />
     <section class="mx-auto grid max-w-7xl gap-10 px-6 py-12 md:grid-cols-2 md:items-center md:py-20 lg:px-10">
         <div class="overflow-hidden bg-[#e6ddd1]"><img :src="service.image_url || 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1200&q=85'" :alt="service.name" class="aspect-[4/3] w-full object-cover"></div>
         <div class="md:pl-8"><p class="text-[10px] tracking-[0.25em] text-[#a98150]">{{ service.category?.name || 'A SIGNATURE RITUAL' }}</p><h1 class="mt-5 font-serif text-5xl leading-tight font-normal md:text-6xl">{{ service.name }}</h1><p class="mt-7 text-sm leading-7 text-[#72695f]">{{ service.description }}</p><div class="mt-8 flex gap-10 border-y border-[#e4dbcf] py-5"><div><p class="text-[9px] tracking-[0.18em] text-[#a49a8e]">TIME TO TAKE</p><p class="mt-2 font-serif text-xl">{{ service.duration_minutes }} minutes</p></div><div><p class="text-[9px] tracking-[0.18em] text-[#a49a8e]">A LITTLE INVESTMENT</p><p class="mt-2 font-serif text-xl">{{ formatPkr(service.price) }}</p></div></div><Link :href="route('bookings.create', { service: service.id })" class="mt-8 inline-block bg-[#a98150] px-7 py-4 text-[10px] tracking-[0.18em] text-white">BOOK THIS RITUAL ↗</Link></div>

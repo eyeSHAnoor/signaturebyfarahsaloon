@@ -62,7 +62,7 @@ function submit() {
 </script>
 
 <template>
-    <Head title="Book a Beauty Appointment in Lahore | Farah" />
+    <Head title="Book a Beauty Appointment in Faisalabad | Signature by Farah" />
     <section class="bg-[#eee6dc] px-6 py-14 text-center md:py-20"><p class="text-[10px] tracking-[0.25em] text-[#a98150]">A LITTLE TIME, JUST FOR YOU</p><h1 class="mt-4 font-serif text-5xl font-normal md:text-6xl">Let’s make it yours.</h1><p class="mx-auto mt-4 max-w-xl text-sm leading-7 text-[#72695f]">Pick a ritual, find your person, and choose a time that feels right.</p></section>
     <section class="mx-auto grid max-w-6xl gap-10 px-6 py-12 md:grid-cols-[1fr_320px] md:py-16">
         <form class="space-y-9" @submit.prevent="submit">
@@ -104,7 +104,7 @@ function submit() {
         <aside class="h-fit bg-[#f0e9df] p-6 md:sticky md:top-8">
             <p class="text-[9px] tracking-[0.2em] text-[#a98150]">A NOTE BEFORE YOU BOOK</p><h2 class="mt-4 font-serif text-2xl">We’ll be ready for you.</h2><p class="mt-3 text-sm leading-6 text-[#72695f]">Your booking is confirmed as soon as you submit. We’ll use your contact details if we need to follow up about your visit.</p>
             <div v-if="selectedService" class="mt-7 border-t border-[#d9cfc1] pt-5"><p class="text-[9px] tracking-[0.16em] text-[#a49a8e]">YOUR RITUAL</p><p class="mt-2 font-serif text-xl">{{ selectedService.name }}</p><p class="mt-1 text-sm text-[#82796f]">{{ selectedService.duration_minutes }} minutes · {{ formatPkr(selectedService.price) }}</p></div>
-            <p class="mt-7 border-t border-[#d9cfc1] pt-5 text-xs leading-6 text-[#82796f]">Need to change plans? Call us at <a class="text-[#8b6842] underline" href="tel:+923001234567">+92 300 1234567</a>.</p>
+            <p class="mt-7 border-t border-[#d9cfc1] pt-5 text-xs leading-6 text-[#82796f]">Need to change plans? Call us at <a class="text-[#8b6842] underline" href="tel:03336601912">03336601912</a>.</p>
             <p class="mt-3 text-xs text-[#82796f]">Already have an account? <Link :href="route('login')" class="text-[#8b6842] underline">Sign in</Link> before booking to see your visit in your dashboard.</p>
         </aside>
     </section>

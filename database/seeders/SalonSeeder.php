@@ -111,9 +111,9 @@ class SalonSeeder extends Seeder
         }
 
         foreach ([
-            'phone' => '+92 300 1234567',
-            'email' => 'hello@farahsalon.pk',
-            'address' => 'Signature by farah 887 /B, peoples  colony #1, near alfateh sport camplex chenone road, Faisalabad, Pakistan',
+            'phone' => '03336601912',
+            'email' => 'Signaturebyfarah@gmail.com',
+            'address' => 'Signature by Farah, 887/B, Peoples Colony No. 1, near Al-Fateh Sports Complex, Chen One Road, Faisalabad, Pakistan',
             'instagram' => 'https://instagram.com/',
             'home_heading' => 'Feel like yourself, only softer.',
             'home_description' => 'Thoughtful hair, skin and beauty rituals in a calm little corner of the city. Come as you are. Leave feeling quietly radiant.',

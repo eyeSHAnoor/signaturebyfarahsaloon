@@ -7,7 +7,7 @@ defineProps<{ settings: Record<string, string> }>();
 </script>
 
 <template>
-    <Head title="Our Story | Signature by Farah Lahore" />
+    <Head title="Our Story | Signature by Farah Faisalabad" />
     <section class="grid min-h-[520px] bg-[#eee6dc] md:grid-cols-2">
         <div class="flex items-center px-7 py-16 md:px-12 lg:px-20">
             <div class="max-w-xl"><p class="text-[10px] tracking-[0.25em] text-[#a98150]">A SALON WITH SOUL</p><h1 class="mt-5 font-serif text-5xl leading-tight font-normal md:text-6xl">We believe beauty<br><em>should feel like you.</em></h1><p class="mt-7 max-w-lg text-sm leading-7 text-[#72695f]">Signature by Farah began with one simple thought: what if your salon felt less like an appointment, and more like being welcomed into a friend's home?</p><Link :href="route('bookings.create')" class="mt-8 inline-block bg-[#a98150] px-6 py-4 text-[10px] tracking-[0.18em] text-white">COME AND MEET US ↗</Link></div>

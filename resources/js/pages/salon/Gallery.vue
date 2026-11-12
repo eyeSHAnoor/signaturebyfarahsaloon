@@ -8,7 +8,7 @@ defineProps<{ gallery: Array<{ id: number; title: string; category?: string; ima
 
 <template>
 
-    <Head title="Bridal & Beauty Gallery | Signature by Farah Lahore" />
+    <Head title="Bridal & Beauty Gallery | Signature by Farah Faisalabad" />
     <section class="bg-[#eee6dc] px-6 py-20 text-center md:py-28">
         <p class="text-[10px] tracking-[0.25em] text-[#a98150]">A FEW FAVOURITE MOMENTS</p>
         <h1 class="mt-5 font-serif text-5xl font-normal md:text-6xl">The Signature feeling</h1>

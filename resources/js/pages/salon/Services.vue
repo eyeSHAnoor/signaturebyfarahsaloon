@@ -8,7 +8,7 @@ defineProps<{ categories: Array<{ id: number; name: string; description?: string
 </script>
 
 <template>
-    <Head title="Hair, Skin & Beauty Services in Lahore | Signature by Farah" />
+    <Head title="Hair, Skin & Beauty Services in Faisalabad | Signature by Farah" />
     <section class="bg-[#eee6dc] px-6 py-20 text-center md:py-28"><p class="text-[10px] tracking-[0.25em] text-[#a98150]">A LITTLE SOMETHING FOR YOU</p><h1 class="mt-5 font-serif text-5xl font-normal md:text-6xl">Our beauty rituals</h1><p class="mx-auto mt-5 max-w-xl text-sm leading-7 text-[#72695f]">Thoughtful treatments, lovely people and a little time to yourself. Find your next favourite.</p></section>
     <section class="mx-auto max-w-7xl space-y-20 px-6 py-16 lg:px-10">
         <div v-for="category in categories" :key="category.id">
