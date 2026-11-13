@@ -64,6 +64,19 @@ test('salon admins can upload images for services, stylists, gallery items, and 
     expect(Storage::disk('public')->allFiles('salon/images'))->toHaveCount(5);
 });
 
+test('salon admins can set a service duration to any positive whole number of minutes', function () {
+    $this->actingAs(salonAdmin())->post('/admin/services', [
+        'name' => 'Quick Treatment',
+        'description' => 'A short custom treatment.',
+        'duration_minutes' => 17,
+        'price' => 60,
+        'featured' => false,
+        'active' => true,
+    ])->assertRedirect()->assertSessionHas('success', 'Service created.');
+
+    expect(Service::query()->where('name', 'Quick Treatment')->value('duration_minutes'))->toBe(17);
+});
+
 test('salon admins can replace a service image with an uploaded file', function () {
     Storage::fake('public');
     $admin = salonAdmin();

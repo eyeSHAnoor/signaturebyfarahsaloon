@@ -379,7 +379,7 @@ class SalonAdminController extends Controller
             'service_category_id' => ['nullable', 'integer', 'exists:service_categories,id'],
             'name' => ['required', 'string', 'max:150'],
             'description' => ['required', 'string', 'max:2000'],
-            'duration_minutes' => ['required', 'integer', 'min:30', 'max:240', 'multiple_of:30'],
+            'duration_minutes' => ['required', 'integer', 'min:1', 'max:65535'],
             'price' => ['required', 'numeric', 'min:0', 'max:999999'],
             'image_url' => ['nullable', 'url', 'max:2048'],
             'image' => ['nullable', 'image', 'max:5120'],

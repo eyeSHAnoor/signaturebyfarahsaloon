@@ -460,9 +460,9 @@ function archive(url: string) {
                         <input
                             v-model.number="serviceForm.duration_minutes"
                             type="number"
-                            min="30"
-                            max="240"
-                            step="30"
+                            min="1"
+                            max="65535"
+                            step="1"
                             required
                             placeholder="Minutes"
                             class="w-full border border-[#ded5c9] px-3 py-3 text-sm"
