@@ -13,6 +13,23 @@ const isAdmin = Array.isArray(user?.roles) && user.roles.includes('super_admin')
 const pathname = computed(() => new URL(page.url, page.props.seo.baseUrl).pathname);
 const canonicalUrl = computed(() => new URL(pathname.value, `${page.props.seo.baseUrl}/`).href);
 const siteName = 'Signature by Farah';
+const salonAddress = computed(
+    () => page.props.settings?.address || 'Signature by Farah, 887/B, Peoples Colony No. 1, near Al-Fateh Sports Complex, Chen One Road, Faisalabad',
+);
+const mapUrl = computed(() => {
+    const url = new URL('https://www.google.com/maps/search/');
+    url.searchParams.set('api', '1');
+    url.searchParams.set('query', salonAddress.value);
+
+    return url.href;
+});
+const mapEmbedUrl = computed(() => {
+    const url = new URL('https://www.google.com/maps');
+    url.searchParams.set('q', salonAddress.value);
+    url.searchParams.set('output', 'embed');
+
+    return url.href;
+});
 
 const pageMetadata: Record<string, { title: string; description: string }> = {
     '/': {
@@ -85,8 +102,7 @@ const structuredData = computed(() => {
         email: settings.email || 'Signaturebyfarah@gmail.com',
         address: {
             '@type': 'PostalAddress',
-            streetAddress:
-                settings.address || 'Signature by Farah, 887/B, Peoples Colony No. 1, near Al-Fateh Sports Complex, Chen One Road',
+            streetAddress: salonAddress.value,
             addressLocality: 'Faisalabad',
             addressRegion: 'Punjab',
             addressCountry: 'PK',
@@ -366,47 +382,66 @@ onUnmounted(() => {
             <slot />
         </main>
         <footer class="bg-[#29251f] text-[#f3ede4]">
-            <div class="mx-auto grid max-w-7xl gap-12 px-6 py-16 md:grid-cols-4 lg:px-10">
-                <div class="md:col-span-2">
-                    <Link :href="route('home')" class="flex items-center gap-3">
-                        <img :src="'/images/full-logo.png'" alt="" class="h-12 w-12 object-contain">
-                        <span class="font-serif text-2xl tracking-[0.08em]">SIGNATURE<span
-                                class="text-[#c6a575]">.</span><span
-                                class="mt-1 block font-sans text-[9px] tracking-[0.3em] text-[#b8afa4]">BY
-                                FARAH</span></span>
+            <div class="mx-auto grid max-w-7xl gap-12 px-6 py-16 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 lg:px-10">
+
+                <!-- Brand & About Column -->
+                <div class="sm:col-span-2 md:col-span-4 lg:col-span-2">
+                    <Link :href="route('home')" class="inline-flex items-center gap-3">
+                        <img :src="'/images/full-logo.png'" alt="Signature by Farah Logo"
+                            class="h-14 w-14 object-contain">
+                        <span class="font-serif text-2xl tracking-[0.08em]">
+                            SIGNATURE<span class="text-[#c6a575]">.</span>
+                            <span class="mt-1 block font-sans text-[9px] tracking-[0.3em] text-[#b8afa4]">BY
+                                FARAH</span>
+                        </span>
                     </Link>
-                    <p class="mt-5 max-w-sm text-sm leading-7 text-[#b8afa4]">A warm, thoughtful beauty salon for
-                        feeling a
-                        little more like yourself. Good hair, good skin, and a slower kind of luxury.</p>
+                    <p class="mt-6 max-w-md text-sm leading-7 text-[#b8afa4]">
+                        A warm, thoughtful beauty salon for feeling a little more like yourself. Good hair, good skin,
+                        and a slower kind of luxury.
+                    </p>
                 </div>
-                <div>
-                    <h3 class="text-[10px] tracking-[0.2em] text-[#c6a575]">EXPLORE</h3>
-                    <div class="mt-5 grid gap-3 text-sm text-[#d3cbc0]">
-                        <Link v-for="item in links.slice(0, 4)" :key="item.route" :href="route(item.route)"
-                            class="hover:text-white">{{ item.label }}</Link>
+
+                <!-- Contact Info Column -->
+                <div class="flex flex-col">
+                    <h3 class="text-[10px] font-semibold tracking-[0.2em] text-[#c6a575] uppercase">Come Say Hello</h3>
+                    <div class="mt-6 flex flex-col gap-3 text-sm leading-6 text-[#d3cbc0]">
+                        <a :href="`tel:${$page.props.settings?.phone || '03336601912'}`"
+                            class="transition hover:text-white">
+                            {{ $page.props.settings?.phone || '03336601912' }}
+                        </a>
+                        <a :href="`mailto:${$page.props.settings?.email || 'Signaturebyfarah@gmail.com'}`"
+                            class="transition hover:text-white break-all">
+                            {{ $page.props.settings?.email || 'Signaturebyfarah@gmail.com' }}
+                        </a>
+                        <span class="leading-relaxed">{{ salonAddress }}</span>
+                        <a :href="$page.props.settings?.instagram || 'https://instagram.com/'" target="_blank"
+                            rel="noreferrer"
+                            class="mt-1 inline-flex items-center gap-1 text-[#c6a575] transition hover:text-white">
+                            Instagram <span aria-hidden="true">↗</span>
+                        </a>
                     </div>
                 </div>
-                <div>
-                    <h3 class="text-[10px] tracking-[0.2em] text-[#c6a575]">COME SAY HELLO</h3>
-                    <div class="mt-5 grid gap-3 text-sm leading-6 text-[#d3cbc0]">
-                        <a :href="`tel:${$page.props.settings?.phone || '03336601912'}`">{{
-                            $page.props.settings?.phone || '03336601912' }}</a>
-                        <a :href="`mailto:${$page.props.settings?.email || 'Signaturebyfarah@gmail.com'}`">{{
-                            $page.props.settings?.email || 'Signaturebyfarah@gmail.com' }}</a>
-                        <span>{{
-                            $page.props.settings?.address ||
-                            `Signature by Farah, 887/B, Peoples Colony No. 1, near Al-Fateh Sports Complex, Chen One
-                            Road,
-                            Faisalabad`
-                        }}</span>
-                        <a :href="$page.props.settings?.instagram || 'https://instagram.com/'" target="_blank"
-                            rel="noreferrer" class="text-[#c6a575]">Instagram ↗</a>
+
+                <!-- Map Column -->
+                <div class="flex flex-col sm:col-span-2 md:col-span-1 lg:col-span-2">
+                    <h3 class="text-[10px] font-semibold tracking-[0.2em] text-[#c6a575] uppercase">Find Us</h3>
+                    <div class="mt-6 flex flex-col gap-3">
+                        <iframe :src="mapEmbedUrl" title="Map to Signature by Farah in Faisalabad" loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade"
+                            class="h-48 w-full border border-white/10 grayscale transition duration-500 hover:grayscale-0">
+                        </iframe>
+                        <a :href="mapUrl" target="_blank" rel="noreferrer"
+                            class="inline-flex items-center gap-1 text-sm text-[#d3cbc0] transition hover:text-white">
+                            Get directions <span aria-hidden="true">↗</span>
+                        </a>
                     </div>
                 </div>
             </div>
-            <div class="border-t border-white/10 px-6 py-5 text-center text-[10px] tracking-[0.12em] text-[#8f867b]">©
-                {{ new
-                    Date().getFullYear() }} SIGNATURE BY FARAH · MADE FOR YOUR MOMENT</div>
+
+            <!-- Bottom Copyright Bar -->
+            <div class="border-t border-white/10 px-6 py-6 text-center text-[10px] tracking-[0.12em] text-[#8f867b]">
+                © {{ new Date().getFullYear() }} SIGNATURE BY FARAH · MADE FOR YOUR MOMENT
+            </div>
         </footer>
     </div>
 </template>
