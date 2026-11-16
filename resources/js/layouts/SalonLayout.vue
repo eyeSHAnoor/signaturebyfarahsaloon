@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { Head, Link, usePage } from '@inertiajs/vue3';
-import { computed, ref, watch, onUnmounted } from 'vue';
+import { computed, ref, watch, onMounted, onUnmounted } from 'vue';
 import ValidationErrors from '@/components/ValidationErrors.vue';
 
 const page = usePage<{
     service?: { name: string; description: string; image_url?: string; price: string; active: boolean };
+    salonCategories?: Array<{ id: number; name: string; slug: string }>;
     settings?: Record<string, string>;
 }>();
 const sidebarOpen = ref(false);
@@ -155,13 +156,12 @@ function showToast(type: 'success' | 'error', message: string) {
     if (clearTimer) clearTimeout(clearTimer);
 
     toast.value = { type, message };
-    // Wait a frame so the enter transition can play
     requestAnimationFrame(() => (toastVisible.value = true));
 
     hideTimer = setTimeout(() => {
         toastVisible.value = false;
         clearTimer = setTimeout(() => (toast.value = null), 300);
-    }, 4000); // show for 4s
+    }, 4000);
 }
 
 function dismissToast() {
@@ -191,14 +191,45 @@ function closeSidebar() {
     document.body.style.overflow = '';
 }
 
-// Close the sidebar automatically on route change (e.g. browser back)
+// ---- Desktop Mega Menu State ----
+const megaMenuOpen = ref(false);
+let megaMenuCloseTimer: ReturnType<typeof setTimeout> | null = null;
+
+function openMegaMenu() {
+    if (megaMenuCloseTimer) clearTimeout(megaMenuCloseTimer);
+    megaMenuOpen.value = true;
+}
+
+function scheduleCloseMegaMenu() {
+    if (megaMenuCloseTimer) clearTimeout(megaMenuCloseTimer);
+    megaMenuCloseTimer = setTimeout(() => (megaMenuOpen.value = false), 150);
+}
+
+function toggleMegaMenu() {
+    megaMenuOpen.value = !megaMenuOpen.value;
+}
+
+// Close on Escape
+function onKeydown(e: KeyboardEvent) {
+    if (e.key === 'Escape') {
+        megaMenuOpen.value = false;
+        if (sidebarOpen.value) closeSidebar();
+    }
+}
+
+onMounted(() => window.addEventListener('keydown', onKeydown));
+
+// Close menus automatically on route change
 watch(pathname, () => {
+    megaMenuOpen.value = false;
     if (sidebarOpen.value) closeSidebar();
 });
 
 onUnmounted(() => {
+    window.removeEventListener('keydown', onKeydown);
     if (hideTimer) clearTimeout(hideTimer);
     if (clearTimer) clearTimeout(clearTimer);
+    if (megaMenuCloseTimer) clearTimeout(megaMenuCloseTimer);
     document.body.style.overflow = '';
 });
 </script>
@@ -250,6 +281,7 @@ onUnmounted(() => {
             class="salon-topline hidden bg-[#29251f] px-6 py-2 text-center text-[11px] tracking-[0.16em] text-[#eee6d9] sm:block">
             A LITTLE TIME FOR YOU — BOOK YOUR NEXT VISIT
         </div>
+
         <header class="relative z-30 border-b border-[#e9e1d7] bg-[#fbf8f3]/95 backdrop-blur">
             <div class="mx-auto flex max-w-7xl items-center justify-between px-5 sm:py-5 py-2 lg:px-10">
                 <Link :href="route('home')" class="flex items-center gap-3 text-[#352b25]">
@@ -259,11 +291,31 @@ onUnmounted(() => {
                             class="mt-1 block font-sans text-[9px] tracking-[0.35em] text-[#857a6d]">BY
                             FARAH</span></span>
                 </Link>
+
                 <nav class="hidden items-center gap-7 lg:flex">
+                    <!-- Desktop Mega Menu Trigger -->
+                    <div v-if="page.props.salonCategories?.length" class="relative" @mouseenter="openMegaMenu"
+                        @mouseleave="scheduleCloseMegaMenu">
+                        <button type="button"
+                            class="flex items-center gap-1.5 text-[13px] font-medium tracking-wide transition hover:text-[#a98150]"
+                            :class="megaMenuOpen ? 'text-[#a98150]' : 'text-[#655c52]'" :aria-expanded="megaMenuOpen"
+                            aria-haspopup="true" @click="toggleMegaMenu">
+                            All Categories
+                            <svg class="h-3.5 w-3.5 transition-transform duration-200"
+                                :class="{ 'rotate-180': megaMenuOpen }" viewBox="0 0 20 20" fill="currentColor"
+                                aria-hidden="true">
+                                <path fill-rule="evenodd"
+                                    d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
+
                     <Link v-for="item in links" :key="item.route" :href="route(item.route)"
                         class="text-[13px] tracking-wide text-[#655c52] transition hover:text-[#a98150]">{{ item.label
                         }}</Link>
                 </nav>
+
                 <div class="hidden items-center gap-5 lg:flex">
                     <template v-if="user">
                         <Link :href="route('dashboard')" class="text-[13px] text-[#655c52] hover:text-[#a98150]">My
@@ -279,6 +331,7 @@ onUnmounted(() => {
                         class="bg-[#7651a5] px-5 py-3 text-[11px] font-medium tracking-[0.14em] text-white transition hover:bg-[#62418e]">
                         BOOK A VISIT</Link>
                 </div>
+
                 <!-- Mobile hamburger -->
                 <button class="relative z-50 flex h-10 w-10 items-center justify-center text-[#7651a5] lg:hidden"
                     aria-label="Open menu" :aria-expanded="sidebarOpen" @click="openSidebar">
@@ -289,6 +342,47 @@ onUnmounted(() => {
                     </svg>
                 </button>
             </div>
+
+            <!-- Desktop Mega Menu Dropdown (50% Width, Centered) -->
+            <Transition enter-active-class="transition duration-200 ease-out"
+                enter-from-class="opacity-0 -translate-y-2" enter-to-class="opacity-100 translate-y-0"
+                leave-active-class="transition duration-150 ease-in" leave-from-class="opacity-100 translate-y-0"
+                leave-to-class="opacity-0 -translate-y-2">
+                <div v-if="megaMenuOpen && page.props.salonCategories?.length"
+                    class="absolute left-1/2 top-full z-40 w-1/2 min-w-[700px] -translate-x-1/2 border-x border-b border-[#e9e1d7] bg-white shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] hidden lg:block"
+                    @mouseenter="openMegaMenu" @mouseleave="scheduleCloseMegaMenu">
+
+                    <div class="px-8 py-10">
+                        <!-- Categories Grid - 2 Columns to fit the narrower space -->
+                        <div class="grid grid-cols-2 gap-x-12 gap-y-8">
+                            <div v-for="category in page.props.salonCategories" :key="category.id">
+                                <Link :href="route('salon.services', { category: category.slug })"
+                                    class="cursor-pointertext-[14px] hover:text-[#7651a5] text-[#29251f] mb-3">
+                                    {{ category.name }}
+                                </Link>
+                            </div>
+                        </div>
+
+                        <!-- Bottom Quick Links -->
+                        <div class="mt-10 pt-6 border-t border-[#f0eadd] flex items-center justify-between">
+                            <div class="flex gap-6">
+                                <Link :href="route('salon.services')"
+                                    class="text-[13px] font-medium text-[#7651a5] hover:text-[#62418e] transition flex items-center gap-1">
+                                    View All Services <span aria-hidden="true">→</span>
+                                </Link>
+                                <Link :href="route('salon.pricing')"
+                                    class="text-[13px] text-[#655c52] hover:text-[#7651a5] transition">
+                                    Price List
+                                </Link>
+                            </div>
+                            <Link :href="route('bookings.create')"
+                                class="text-[13px] font-medium text-[#29251f] hover:text-[#7651a5] transition">
+                                Book an Appointment
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            </Transition>
         </header>
 
         <!-- Mobile sidebar backdrop -->
@@ -304,7 +398,7 @@ onUnmounted(() => {
             enter-to-class="translate-x-0" leave-active-class="transition duration-250 ease-in"
             leave-from-class="translate-x-0" leave-to-class="translate-x-full">
             <aside v-if="sidebarOpen"
-                class="fixed right-0 top-0 z-50 flex h-full w-[min(85vw,340px)] flex-col bg-[#fbf8f3] shadow-2xl lg:hidden"
+                class="fixed right-0 top-0 z-50 flex h-full w-[min(90vw,380px)] flex-col bg-[#fbf8f3] shadow-2xl lg:hidden"
                 role="dialog" aria-modal="true" aria-label="Menu">
                 <!-- Sidebar header -->
                 <div class="flex items-center justify-between border-b border-[#e9e1d7] px-5 py-4">
@@ -327,37 +421,71 @@ onUnmounted(() => {
                 </div>
 
                 <!-- Sidebar nav links -->
-                <nav class="flex-1 overflow-y-auto px-3 py-4">
+                <nav class="flex-1 overflow-y-auto px-5 py-5">
+
+                    <!-- Mobile Categories Pill Grid -->
+                    <div v-if="page.props.salonCategories?.length" class="mb-6">
+                        <p class="text-[10px] font-semibold tracking-[0.18em] text-[#a98150] uppercase mb-3">Browse by
+                            Category
+                        </p>
+
+                        <!-- Pill Container -->
+                        <div class="flex flex-wrap gap-2">
+                            <!-- All Services Pill -->
+                            <Link :href="route('salon.services')"
+                                class="inline-flex items-center justify-center rounded-full bg-[#f0eadd] px-4 py-2.5 text-[13px] font-medium text-[#59472e] transition hover:bg-[#7651a5] hover:text-white"
+                                @click="closeSidebar">
+                                All Services
+                            </Link>
+
+                            <!-- Individual Category Pills -->
+                            <Link v-for="category in page.props.salonCategories" :key="category.id"
+                                :href="route('salon.services', { category: category.slug })"
+                                class="inline-flex items-center justify-center gap-2 rounded-full border border-[#e9e1d7] bg-white px-4 py-2.5 text-[13px] text-[#4a4238] shadow-sm transition hover:border-[#7651a5] hover:bg-[#efe6d8] hover:text-[#7651a5]"
+                                @click="closeSidebar">
+                                {{ category.name }}
+                            </Link>
+                        </div>
+                    </div>
+
+                    <div class="my-6 border-t border-[#e9e1d7]"></div>
+
+                    <!-- Main Nav Links -->
                     <div class="grid gap-0.5">
+                        <p class="text-[10px] font-semibold tracking-[0.18em] text-[#a98150] uppercase mb-2 px-1">
+                            Explore</p>
                         <Link v-for="item in links" :key="item.route" :href="route(item.route)"
-                            class="rounded-lg px-3 py-3 text-[15px] text-[#4a4238] transition hover:bg-[#efe6d8] hover:text-[#7651a5]"
+                            class="rounded-lg px-3 py-2.5 text-[15px] text-[#4a4238] transition hover:bg-[#efe6d8] hover:text-[#7651a5]"
                             @click="closeSidebar">
                             {{ item.label }}
                         </Link>
                     </div>
 
-                    <div class="my-4 border-t border-[#e9e1d7]"></div>
+                    <div class="my-6 border-t border-[#e9e1d7]"></div>
 
-                    <div class="grid gap-0.5">
+                    <!-- Account Links -->
+                    <div class="grid gap-0.5 pb-4">
+                        <p class="text-[10px] font-semibold tracking-[0.18em] text-[#a98150] uppercase mb-2 px-1">
+                            Account</p>
                         <template v-if="user">
                             <Link :href="route('dashboard')"
-                                class="rounded-lg px-3 py-3 text-[15px] text-[#4a4238] transition hover:bg-[#efe6d8] hover:text-[#7651a5]"
+                                class="rounded-lg px-3 py-2.5 text-[15px] text-[#4a4238] transition hover:bg-[#efe6d8] hover:text-[#7651a5]"
                                 @click="closeSidebar">
                                 My visits
                             </Link>
                             <Link v-if="isAdmin" :href="route('admin.dashboard')"
-                                class="rounded-lg px-3 py-3 text-[15px] text-[#4a4238] transition hover:bg-[#efe6d8] hover:text-[#7651a5]"
+                                class="rounded-lg px-3 py-2.5 text-[15px] text-[#4a4238] transition hover:bg-[#efe6d8] hover:text-[#7651a5]"
                                 @click="closeSidebar">
                                 Studio
                             </Link>
                             <Link :href="route('logout')" method="post" as="button"
-                                class="salon-signout rounded-lg px-3 py-3 text-left text-[15px] text-[#4a4238] transition hover:bg-[#efe6d8] hover:text-[#7651a5]"
+                                class="salon-signout rounded-lg px-3 py-2.5 text-left text-[15px] text-[#4a4238] transition hover:bg-[#efe6d8] hover:text-[#7651a5]"
                                 @click="closeSidebar">
                                 Sign out
                             </Link>
                         </template>
                         <Link v-else :href="route('login')"
-                            class="rounded-lg px-3 py-3 text-[15px] text-[#4a4238] transition hover:bg-[#efe6d8] hover:text-[#7651a5]"
+                            class="rounded-lg px-3 py-2.5 text-[15px] text-[#4a4238] transition hover:bg-[#efe6d8] hover:text-[#7651a5]"
                             @click="closeSidebar">
                             Sign in
                         </Link>
@@ -365,7 +493,7 @@ onUnmounted(() => {
                 </nav>
 
                 <!-- Sidebar footer CTA -->
-                <div class="border-t border-[#e9e1d7] p-4">
+                <div class="border-t border-[#e9e1d7] p-5 bg-white">
                     <Link :href="route('bookings.create')"
                         class="block w-full bg-[#7651a5] px-4 py-3.5 text-center text-[11px] font-medium tracking-[0.14em] text-white transition hover:bg-[#62418e]"
                         @click="closeSidebar">
@@ -443,5 +571,17 @@ onUnmounted(() => {
                 © {{ new Date().getFullYear() }} SIGNATURE BY FARAH · MADE FOR YOUR MOMENT
             </div>
         </footer>
+        <a href="https://wa.me/923336601912?text=Hello%20Signature%20by%20Farah%2C%20I%27d%20like%20to%20ask%20about%20your%20services."
+            target="_blank" rel="noopener noreferrer"
+            aria-label="Message Signature by Farah on WhatsApp at +92 333 6601912" title="WhatsApp +92 333 6601912"
+            class="fixed right-5 bottom-5 z-[35] flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition hover:scale-105 hover:bg-[#20bd5a] focus-visible:ring-4 focus-visible:ring-[#25D366]/40 focus-visible:outline-none">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="h-7 w-7" aria-hidden="true">
+                <path d="M20.5 11.8a8.4 8.4 0 0 1-12.4 7.4L3 20.5l1.3-5a8.4 8.4 0 1 1 16.2-3.7Z" stroke="currentColor"
+                    stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" />
+                <path
+                    d="M9 8.2c.2-.4.4-.4.7-.4h.5c.2 0 .4.1.5.4l.7 1.7c.1.2.1.4 0 .6l-.5.6c-.2.2-.2.4-.1.6.5.9 1.2 1.6 2.1 2.1.2.1.4.1.6-.1l.6-.6c.2-.2.4-.2.6-.1l1.6.8c.3.1.4.3.4.5 0 .4-.2 1.1-.6 1.5-.4.4-1.1.7-1.8.6-1-.1-2.4-.7-3.9-2-1.2-1.1-2.1-2.5-2.3-3.5-.2-.9.1-1.8.5-2.3Z"
+                    fill="currentColor" />
+            </svg>
+        </a>
     </div>
 </template>

@@ -9,6 +9,7 @@ use App\Models\SalonTestimonial;
 use App\Models\Service;
 use App\Models\ServiceCategory;
 use App\Models\Stylist;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -30,12 +31,19 @@ class SalonPageController extends Controller
         return Inertia::render('salon/About', ['settings' => $this->settings()]);
     }
 
-    public function services(): Response
+    public function services(Request $request): Response
     {
+        $categories = ServiceCategory::query()->where('active', true)->orderBy('sort_order')->with([
+            'services' => fn ($query) => $query->where('active', true)->orderBy('name'),
+        ])->get();
+        $categorySlug = $request->query('category');
+
+        if (is_string($categorySlug) && $categories->contains('slug', $categorySlug)) {
+            $categories = $categories->where('slug', $categorySlug)->values();
+        }
+
         return Inertia::render('salon/Services', [
-            'categories' => ServiceCategory::query()->where('active', true)->orderBy('sort_order')->with([
-                'services' => fn ($query) => $query->where('active', true)->orderBy('name'),
-            ])->get(),
+            'categories' => $categories,
         ]);
     }
 

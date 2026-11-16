@@ -27,6 +27,46 @@ test('salon public pages render with the dynamic service catalog', function () {
     }
 });
 
+test('services can be filtered by category and active categories are shared with the salon navigation', function () {
+    $hair = ServiceCategory::query()->create([
+        'name' => 'Hair',
+        'slug' => 'hair',
+        'active' => true,
+    ]);
+    $nails = ServiceCategory::query()->create([
+        'name' => 'Nails',
+        'slug' => 'nails',
+        'active' => true,
+    ]);
+    ServiceCategory::query()->create([
+        'name' => 'Archived',
+        'slug' => 'archived',
+        'active' => false,
+    ]);
+
+    foreach ([[$hair, 'Signature Cut'], [$nails, 'Manicure']] as [$category, $name]) {
+        Service::query()->create([
+            'service_category_id' => $category->id,
+            'name' => $name,
+            'slug' => str($name)->slug(),
+            'description' => 'A thoughtful salon service.',
+            'duration_minutes' => 60,
+            'price' => 60,
+            'active' => true,
+        ]);
+    }
+
+    $this->get('/services?category=hair')
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('salon/Services')
+            ->has('categories', 1)
+            ->where('categories.0.name', 'Hair')
+            ->has('categories.0.services', 1)
+            ->has('salonCategories', 2)
+            ->where('salonCategories.0.slug', 'hair')
+            ->where('salonCategories.1.slug', 'nails'));
+});
+
 test('contact page displays the current salon contact details', function () {
     $this->get('/contact')
         ->assertInertia(fn (Assert $page) => $page

@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\ServiceCategory;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
@@ -57,6 +58,9 @@ class HandleInertiaRequests extends Middleware
             'seo' => [
                 'baseUrl' => rtrim(config('app.url') ?: $request->getSchemeAndHttpHost(), '/'),
             ],
+            'salonCategories' => fn () => Schema::hasTable('service_categories')
+                ? ServiceCategory::query()->where('active', true)->orderBy('sort_order')->get(['id', 'name', 'slug'])
+                : [],
             'quote' => [
                 'message' => trim($message),
                 'author' => trim($author),
