@@ -15,7 +15,7 @@ class AppointmentScheduler
         CarbonImmutable $date,
         ?int $ignoreAppointmentId = null,
     ): array {
-        if ($date->toDateString() < now()->toDateString() || $date->isSunday() || $date->isMonday()) {
+        if ($date->toDateString() < now()->toDateString()) {
             return [];
         }
 
@@ -29,7 +29,7 @@ class AppointmentScheduler
         $occupied = array_fill_keys($reservations, true);
         $times = [];
 
-        for ($minute = 9 * 60; $minute + $durationMinutes <= 19 * 60; $minute += 30) {
+        for ($minute = 10 * 60 + 30; $minute + $durationMinutes <= 20 * 60; $minute += 30) {
             if ($date->isToday() && $date->setTime(intdiv($minute, 60), $minute % 60)->lessThanOrEqualTo(now())) {
                 continue;
             }

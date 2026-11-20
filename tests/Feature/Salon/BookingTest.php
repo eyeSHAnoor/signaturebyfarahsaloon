@@ -37,7 +37,7 @@ test('customers can book an available stylist time and see a confirmation', func
         'service_id' => $service->id,
         'stylist_id' => $stylist->id,
         'appointment_date' => $date,
-        'appointment_time' => '10:00',
+        'appointment_time' => '10:30',
         'customer_name' => 'Taylor Guest',
         'customer_email' => 'taylor@example.com',
         'customer_phone' => '+15550000000',
@@ -56,14 +56,14 @@ test('a stylist cannot be booked for an overlapping appointment', function () {
         'service_id' => $service->id,
         'stylist_id' => $stylist->id,
         'appointment_date' => $date,
-        'appointment_time' => '10:00',
+        'appointment_time' => '10:30',
         'customer_name' => 'Taylor Guest',
         'customer_email' => 'taylor@example.com',
         'customer_phone' => '+15550000000',
     ];
 
     $this->post('/book', $booking)->assertRedirect();
-    $this->post('/book', [...$booking, 'appointment_time' => '10:30'])->assertSessionHasErrors('appointment_time');
+    $this->post('/book', [...$booking, 'appointment_time' => '11:00'])->assertSessionHasErrors('appointment_time');
 
     $this->assertDatabaseCount('appointments', 1);
 });
@@ -78,7 +78,7 @@ test('available times include only times with room for the full service duration
         'service_id' => $service->id,
         'stylist_id' => $stylist->id,
         'appointment_date' => $date,
-        'appointment_time' => '10:00',
+        'appointment_time' => '10:30',
         'customer_name' => 'Taylor Guest',
         'customer_email' => 'taylor@example.com',
         'customer_phone' => '+15550000000',
@@ -90,22 +90,32 @@ test('available times include only times with room for the full service duration
         'date' => $date,
     ]));
 
-    $response->assertOk()->assertJsonMissing(['times' => ['10:00', '10:30']]);
-    expect($response->json('times'))->not->toContain('10:00')->not->toContain('10:30');
+    $response->assertOk()->assertJsonMissing(['times' => ['10:30', '11:00']]);
+    expect($response->json('times'))->not->toContain('10:30')->not->toContain('11:00');
 });
 
-test('salon does not offer appointments on Sundays or Mondays', function () {
+test('salon offers appointments every day of the week', function () {
     $service = salonService();
     $stylist = Stylist::query()->create(['name' => 'Amelia Rose', 'title' => 'Stylist', 'active' => true]);
-    $date = CarbonImmutable::now()->next(CarbonImmutable::SUNDAY)->toDateString();
 
-    $response = $this->getJson(route('bookings.availability', [
-        'service_id' => $service->id,
-        'stylist_id' => $stylist->id,
-        'date' => $date,
-    ]));
+    foreach ([CarbonImmutable::SUNDAY, CarbonImmutable::MONDAY] as $day) {
+        $response = $this->getJson(route('bookings.availability', [
+            'service_id' => $service->id,
+            'stylist_id' => $stylist->id,
+            'date' => CarbonImmutable::now()->next($day)->toDateString(),
+        ]));
 
-    $response->assertOk()->assertExactJson(['times' => []]);
+        $response->assertOk();
+        expect($response->json('times'))->toContain('10:30');
+    }
+});
+
+test('available times fit within salon opening hours', function () {
+    $stylist = Stylist::query()->create(['name' => 'Amelia Rose', 'title' => 'Stylist', 'active' => true]);
+    $date = CarbonImmutable::now()->next(CarbonImmutable::TUESDAY);
+    $times = app(AppointmentScheduler::class)->availableStartTimes($stylist->id, 60, $date);
+
+    expect($times)->toContain('10:30')->toContain('19:00')->not->toContain('10:00')->not->toContain('19:30');
 });
 
 test('same-day booking only offers future opening slots', function () {
@@ -170,7 +180,7 @@ test('administrators can reschedule and cancel appointments while releasing the 
         'service_id' => $service->id,
         'stylist_id' => $stylist->id,
         'appointment_date' => $date,
-        'appointment_time' => '10:00',
+        'appointment_time' => '10:30',
         'customer_name' => 'Taylor Guest',
         'customer_email' => 'taylor@example.com',
         'customer_phone' => '+15550000000',

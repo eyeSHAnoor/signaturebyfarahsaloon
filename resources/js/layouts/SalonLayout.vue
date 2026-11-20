@@ -108,6 +108,14 @@ const structuredData = computed(() => {
             addressRegion: 'Punjab',
             addressCountry: 'PK',
         },
+        openingHoursSpecification: [
+            {
+                '@type': 'OpeningHoursSpecification',
+                dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => `https://schema.org/${day}`),
+                opens: '10:30',
+                closes: '20:00',
+            },
+        ],
         areaServed: { '@type': 'City', name: 'Faisalabad' },
         sameAs: settings.instagram ? [settings.instagram] : [],
     };
@@ -253,6 +261,7 @@ onUnmounted(() => {
         <meta name="twitter:image" :content="shareImage" head-key="twitter:image" />
         <component :is="'script'" type="application/ld+json" head-key="salon-structured-data"
             v-html="structuredDataJson" />
+        <link rel="icon" href="/images/favicon.png" type="image/png" />
     </Head>
     <div class="salon-site min-h-screen bg-[#fbf8f3] text-[#29251f]">
         <!-- Flash toast notification -->
@@ -542,6 +551,10 @@ onUnmounted(() => {
                             {{ $page.props.settings?.email || 'Signaturebyfarah@gmail.com' }}
                         </a>
                         <span class="leading-relaxed">{{ salonAddress }}</span>
+                        <div class="mt-2">
+                            <p class="text-[9px] tracking-[0.15em] text-[#c6a575]">OPENING HOURS</p>
+                            <p class="mt-1">Every day · 10:30am–8pm</p>
+                        </div>
                         <a :href="$page.props.settings?.instagram || 'https://instagram.com/'" target="_blank"
                             rel="noreferrer"
                             class="mt-1 inline-flex items-center gap-1 text-[#c6a575] transition hover:text-white">

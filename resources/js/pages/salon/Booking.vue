@@ -77,7 +77,7 @@ function submit() {
                 <p v-if="form.errors.stylist_id" class="mt-2 text-sm text-red-700">{{ form.errors.stylist_id }}</p>
             </section>
             <section>
-                <div class="mb-5 flex items-center gap-4"><span class="font-serif text-3xl text-[#a98150]">03</span><div><h2 class="font-serif text-2xl">Find a time</h2><p class="mt-1 text-xs text-[#82796f]">We’re here Tuesday to Saturday, 9am–7pm.</p></div></div>
+                <div class="mb-5 flex items-center gap-4"><span class="font-serif text-3xl text-[#a98150]">03</span><div><h2 class="font-serif text-2xl">Find a time</h2><p class="mt-1 text-xs text-[#82796f]">We’re here every day, 10:30am–8pm.</p></div></div>
                 <input v-model="form.appointment_date" type="date" :min="today" required class="w-full border border-[#ded5c9] bg-white px-4 py-4 text-sm outline-none focus:border-[#a98150]">
                 <p v-if="form.errors.appointment_date" class="mt-2 text-sm text-red-700">{{ form.errors.appointment_date }}</p>
                 <div v-if="form.service_id && form.stylist_id && form.appointment_date" class="mt-5">

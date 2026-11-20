@@ -41,7 +41,7 @@ const directionsUrl = computed(() => `https://maps.google.com/?q=${encodeURIComp
                     </p>
                     <p>
                         <span class="block text-[9px] tracking-[0.15em] text-[#a98150]">OPENING HOURS</span>
-                        <span class="mt-1 inline-block">Tuesday–Saturday · 9am–7pm</span>
+                        <span class="mt-1 inline-block">Every day · 10:30am–8pm</span>
                     </p>
                 </div>
                 <Link :href="route('bookings.create')" class="mt-8 inline-block bg-[#29251f] px-6 py-4 text-[10px] tracking-[0.18em] text-white">
