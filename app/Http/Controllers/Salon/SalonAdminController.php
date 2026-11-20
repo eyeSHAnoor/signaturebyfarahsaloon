@@ -66,9 +66,13 @@ class SalonAdminController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:120', 'unique:service_categories,name'],
             'description' => ['nullable', 'string', 'max:1000'],
+            'image_url' => ['nullable', 'url', 'max:2048'],
+            'image' => ['nullable', 'image', 'max:5120'],
             'sort_order' => ['nullable', 'integer', 'min:0', 'max:65535'],
             'active' => ['sometimes', 'boolean'],
         ]);
+        $data['image_url'] = $this->uploadedImageUrl($request, 'image') ?? ($data['image_url'] ?? null);
+        unset($data['image']);
 
         ServiceCategory::query()->create([...$data, 'slug' => Str::slug($data['name'])]);
 
@@ -80,9 +84,14 @@ class SalonAdminController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:120', Rule::unique('service_categories', 'name')->ignore($category->id)],
             'description' => ['nullable', 'string', 'max:1000'],
+            'image_url' => ['nullable', 'url', 'max:2048'],
+            'image' => ['nullable', 'image', 'max:5120'],
             'sort_order' => ['nullable', 'integer', 'min:0', 'max:65535'],
             'active' => ['required', 'boolean'],
         ]);
+        $data['image_url'] = $this->uploadedImageUrl($request, 'image')
+            ?? (array_key_exists('image_url', $data) ? $data['image_url'] : $category->image_url);
+        unset($data['image']);
 
         $category->update([...$data, 'slug' => Str::slug($data['name'])]);
 

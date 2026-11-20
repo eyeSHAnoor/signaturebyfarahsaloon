@@ -31,6 +31,7 @@ test('services can be filtered by category and active categories are shared with
     $hair = ServiceCategory::query()->create([
         'name' => 'Hair',
         'slug' => 'hair',
+        'image_url' => 'https://example.com/hair.jpg',
         'active' => true,
     ]);
     $nails = ServiceCategory::query()->create([
@@ -62,6 +63,9 @@ test('services can be filtered by category and active categories are shared with
             ->has('categories', 1)
             ->where('categories.0.name', 'Hair')
             ->has('categories.0.services', 1)
+            ->has('categoryCards', 2)
+            ->where('categoryCards.0.image_url', 'https://example.com/hair.jpg')
+            ->where('categoryCards.0.services_count', 1)
             ->has('salonCategories', 2)
             ->where('salonCategories.0.slug', 'hair')
             ->where('salonCategories.1.slug', 'nails'));

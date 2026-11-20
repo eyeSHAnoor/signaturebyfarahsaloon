@@ -7,7 +7,7 @@ import { reactive, ref } from 'vue';
 
 defineOptions({ layout: SalonLayout });
 
-type Category = { id: number; name: string; description?: string; sort_order: number; active: boolean };
+type Category = { id: number; name: string; description?: string; image_url?: string; sort_order: number; active: boolean };
 type Service = {
     id: number;
     service_category_id?: number | null;
@@ -84,7 +84,7 @@ const serviceForm = useForm({
     active: true,
 });
 const stylistForm = useForm({ name: '', title: 'Senior Stylist', bio: '', image_url: '', image: null as File | null, active: true });
-const categoryForm = useForm({ name: '', description: '', sort_order: 0, active: true });
+const categoryForm = useForm({ name: '', description: '', image_url: '', image: null as File | null, sort_order: 0, active: true });
 const galleryForm = useForm({
     title: '',
     category: '',
@@ -280,15 +280,23 @@ function saveTestimonial() {
 
 function saveCategory() {
     if (editingCategory.value) {
-        categoryForm.put(route('admin.categories.update', editingCategory.value), {
-            preserveScroll: true,
-            onSuccess: () => {
-                editingCategory.value = null;
-                categoryForm.reset();
-            },
-        });
+        categoryForm
+            .transform((data) => ({ ...data, _method: 'put' }))
+            .post(route('admin.categories.update', editingCategory.value), {
+                forceFormData: true,
+                preserveScroll: true,
+                onSuccess: () => {
+                    editingCategory.value = null;
+                    categoryForm.reset();
+                },
+                onFinish: () => categoryForm.transform((data) => data),
+            });
     } else {
-        categoryForm.post(route('admin.categories.store'), { preserveScroll: true, onSuccess: () => categoryForm.reset() });
+        categoryForm.post(route('admin.categories.store'), {
+            forceFormData: true,
+            preserveScroll: true,
+            onSuccess: () => categoryForm.reset(),
+        });
     }
 }
 
@@ -437,10 +445,39 @@ function archive(url: string) {
                         placeholder="Short description"
                         class="w-full border border-[#ded5c9] px-3 py-3 text-sm"
                     />
+                    <input
+                        v-model="categoryForm.image_url"
+                        type="url"
+                        placeholder="Image URL (optional)"
+                        class="w-full border border-[#ded5c9] px-3 py-3 text-sm"
+                    />
+                    <label class="grid gap-2 text-xs text-[#655c52]"
+                        >Or choose a category image from your device<input
+                            type="file"
+                            accept="image/*"
+                            class="w-full border border-[#ded5c9] px-3 py-3 text-sm"
+                            @change="categoryForm.image = selectedImage($event)"
+                        /><span v-if="categoryForm.image" class="text-[#82796f]">{{ categoryForm.image.name }}</span></label
+                    >
+                    <ImagePreview :src="categoryForm.image_url" :file="categoryForm.image" label="Category image preview" />
                     <button class="bg-[#29251f] px-4 py-3 text-[9px] tracking-[0.14em] text-white">
                         {{ editingCategory ? 'UPDATE CATEGORY' : 'ADD CATEGORY' }}
                     </button>
-                    <p v-if="categoryForm.errors.name" class="text-xs text-red-700">{{ categoryForm.errors.name }}</p>
+                    <p v-if="categoryForm.progress" role="status" class="text-xs text-[#82796f]">
+                        Uploading image: {{ categoryForm.progress.percentage }}%
+                    </p>
+                    <p v-for="error in Object.values(categoryForm.errors)" :key="error" class="text-xs text-red-700">{{ error }}</p>
+                    <button
+                        v-if="editingCategory"
+                        type="button"
+                        class="ml-3 text-xs underline"
+                        @click="
+                            editingCategory = null;
+                            categoryForm.reset();
+                        "
+                    >
+                        Cancel
+                    </button>
                 </form>
                 <form class="space-y-3 bg-white p-5" @submit.prevent="saveService">
                     <h2 class="font-serif text-2xl">{{ editingService ? 'Edit service' : 'New service' }}</h2>
@@ -519,9 +556,12 @@ function archive(url: string) {
                     <h2 class="font-serif text-2xl">Service categories</h2>
                     <div class="mt-3 grid gap-2 sm:grid-cols-2">
                         <article v-for="category in categories" :key="category.id" class="flex items-center justify-between bg-white p-4">
-                            <div>
-                                <p class="font-medium">{{ category.name }}</p>
-                                <p class="text-[10px] text-[#82796f]">{{ category.active ? 'Visible' : 'Hidden' }}</p>
+                            <div class="flex items-center gap-3">
+                                <img v-if="category.image_url" :src="category.image_url" :alt="category.name" class="h-12 w-12 object-cover" />
+                                <div>
+                                    <p class="font-medium">{{ category.name }}</p>
+                                    <p class="text-[10px] text-[#82796f]">{{ category.active ? 'Visible' : 'Hidden' }}</p>
+                                </div>
                             </div>
                             <div class="flex gap-3">
                                 <button
@@ -531,6 +571,8 @@ function archive(url: string) {
                                         categoryForm.defaults({
                                             name: category.name,
                                             description: category.description || '',
+                                            image_url: category.image_url || '',
+                                            image: null,
                                             sort_order: category.sort_order,
                                             active: category.active,
                                         });

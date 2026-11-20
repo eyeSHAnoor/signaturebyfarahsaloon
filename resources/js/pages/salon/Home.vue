@@ -3,6 +3,9 @@ import { Head, Link } from '@inertiajs/vue3';
 import SalonLayout from '@/layouts/SalonLayout.vue';
 import { formatPkr } from '@/lib/currency';
 
+const heroImage = '/images/hero.jpeg';
+const OwnerImage = '/images/owner.jpeg';
+
 defineOptions({ layout: SalonLayout });
 defineProps<{
     services: Array<{ id: number; name: string; slug: string; description: string; duration_minutes: number; price: string; image_url?: string; category?: { name: string } }>;
@@ -17,8 +20,8 @@ defineProps<{
 
     <Head title="Signature by Farah | Beauty Salon in Faisalabad" />
     <section class="relative min-h-[620px] overflow-hidden bg-[#40352e] md:min-h-[690px]">
-        <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=2200&q=90"
-            alt="A sunlit beauty studio" class="absolute inset-0 h-full w-full object-cover object-center opacity-60">
+        <img :src="heroImage" alt="A sunlit beauty studio"
+            class="absolute inset-0 h-full w-full object-cover object-center opacity-60">
         <div class="absolute inset-0 bg-gradient-to-r from-[#28123f]/90 via-[#563375]/65 to-[#7651a5]/15"></div>
         <div class="relative mx-auto flex min-h-[620px] max-w-7xl items-center px-6 py-20 md:min-h-[690px] lg:px-10">
             <div class="max-w-2xl text-white">
@@ -116,8 +119,7 @@ defineProps<{
 
     <section class="mx-auto grid max-w-7xl gap-12 px-6 py-20 md:grid-cols-2 md:items-center md:py-28 lg:px-10">
         <div class="relative mx-auto w-full max-w-lg">
-            <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1000&q=90"
-                alt="A moment of quiet confidence" class="aspect-[4/5] w-full object-cover">
+            <img :src="OwnerImage" alt="A moment of quiet confidence" class="aspect-[4/5] w-full object-cover">
             <div
                 class="absolute -right-4 -bottom-5 bg-[#e8d9c4] px-6 py-5 font-serif text-xl italic text-[#4c4034] sm:-right-8">
                 Made with care, always.</div>
@@ -204,7 +206,7 @@ defineProps<{
                     <p class="text-sm tracking-[0.2em] text-[#c6a575]">{{ '★'.repeat(review.rating) }}</p>
                     <p class="mt-5 font-serif text-xl leading-8 italic text-[#f1e9df]">“{{ review.quote }}”</p>
                     <p class="mt-7 text-[10px] tracking-[0.15em] text-[#c6a575]">{{ review.customer_name.toUpperCase()
-                    }}</p>
+                        }}</p>
                 </article>
                 <p v-if="testimonials.length === 0" class="col-span-full text-center text-sm text-[#c6a575]">Lovely
                     words from our guests are coming soon.</p>

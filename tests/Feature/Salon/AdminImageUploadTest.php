@@ -3,6 +3,7 @@
 use App\Models\SalonGalleryItem;
 use App\Models\SalonTestimonial;
 use App\Models\Service;
+use App\Models\ServiceCategory;
 use App\Models\Stylist;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
@@ -62,6 +63,31 @@ test('salon admins can upload images for services, stylists, gallery items, and 
 
     expect(SalonTestimonial::query()->firstOrFail()->image_url)->toContain('/storage/salon/images/');
     expect(Storage::disk('public')->allFiles('salon/images'))->toHaveCount(5);
+});
+
+test('salon admins can upload and replace category images', function () {
+    Storage::fake('public');
+    $this->actingAs(salonAdmin());
+
+    $this->post('/admin/categories', [
+        'name' => 'Hair',
+        'image' => UploadedFile::fake()->image('hair.png'),
+    ])->assertRedirect()->assertSessionHas('success', 'Service category created.');
+
+    $category = ServiceCategory::query()->firstOrFail();
+    expect($category->image_url)->toContain('/storage/salon/images/');
+
+    $this->post('/admin/categories/'.$category->id, [
+        '_method' => 'put',
+        'name' => 'Hair',
+        'description' => 'Hair services',
+        'sort_order' => 0,
+        'active' => true,
+        'image' => UploadedFile::fake()->image('hair-replacement.png'),
+    ])->assertRedirect()->assertSessionHas('success', 'Service category updated.');
+
+    expect($category->refresh()->image_url)->toContain('/storage/salon/images/')
+        ->and(Storage::disk('public')->allFiles('salon/images'))->toHaveCount(2);
 });
 
 test('salon admins can set a service duration to any positive whole number of minutes', function () {

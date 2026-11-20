@@ -5,7 +5,15 @@ import SalonLayout from '@/layouts/SalonLayout.vue';
 import { formatPkr } from '@/lib/currency';
 
 defineOptions({ layout: SalonLayout });
-defineProps<{ categories: Array<{ id: number; name: string; description?: string; services: Array<{ id: number; name: string; slug: string; description: string; duration_minutes: number; price: string; image_url?: string }> }> }>();
+defineProps<{
+    categories: Array<{
+        id: number;
+        name: string;
+        description?: string;
+        services: Array<{ id: number; name: string; slug: string; description: string; duration_minutes: number; price: string; image_url?: string }>;
+    }>;
+    categoryCards: Array<{ id: number; name: string; slug: string; image_url?: string; services_count: number }>;
+}>();
 const page = usePage<{ salonCategories?: Array<{ id: number; name: string; slug: string }> }>();
 const selectedCategory = computed(() => {
     const category = new URL(page.url, page.props.seo.baseUrl).searchParams.get('category');
@@ -26,36 +34,29 @@ const selectedCategory = computed(() => {
     </section>
 
     <!-- Thin, transparent scrolling category filter -->
-    <nav v-if="page.props.salonCategories?.length" aria-label="Filter services by category"
-        class="mx-auto max-w-7xl px-6 pt-8 lg:px-10">
 
-        <!-- Scroll container with custom thin scrollbar styling -->
-        <div class="flex gap-6 overflow-x-auto pb-3 border-b border-[#e4dbcf] 
-                    [&::-webkit-scrollbar]:h-1.5 
-                    [&::-webkit-scrollbar-track]:bg-transparent 
-                    [&::-webkit-scrollbar-thumb]:bg-[#d8cfc3]/60 
-                    [&::-webkit-scrollbar-thumb]:rounded-full 
-                    hover:[&::-webkit-scrollbar-thumb]:bg-[#a98150]/70 
-                    transition-colors">
 
-            <Link :href="route('salon.services')"
-                class="shrink-0 pb-2 text-[13px] tracking-wide transition-all border-b-2 -mb-[2px]" :class="selectedCategory
-                    ? 'border-transparent text-[#82796f] hover:text-[#655c52]'
-                    : 'border-[#7651a5] font-medium text-[#29251f]'">
-                All services
-            </Link>
+    <section v-if="!selectedCategory" class="mx-auto grid max-w-7xl grid-cols-2 gap-4 px-6 py-10 md:gap-6 lg:px-10">
+        <Link v-for="category in categoryCards" :key="category.id"
+            :href="route('salon.services', { category: category.slug })"
+            class="group relative aspect-[0.78] overflow-hidden rounded-[1.5rem] bg-[#29251f] sm:aspect-[0.9]">
+            <img v-if="category.image_url" :src="category.image_url" :alt="category.name"
+                class="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105" />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent"></div>
+            <div class="absolute inset-x-0 bottom-0 p-4 text-white sm:p-7">
+                <h2 class="font-serif text-xl sm:text-3xl">{{ category.name }}</h2>
+                <p class="mt-2 text-xs tracking-wide sm:text-base">{{ category.services_count }} services <span
+                        aria-hidden="true">→</span></p>
+            </div>
+        </Link>
+        <p v-if="categoryCards.length === 0" class="col-span-2 py-16 text-center text-sm text-[#82796f]">
+            Our menu is being refreshed. Please check back soon.
+        </p>
+    </section>
 
-            <Link v-for="category in page.props.salonCategories" :key="category.id"
-                :href="route('salon.services', { category: category.slug })"
-                class="shrink-0 pb-2 text-[13px] tracking-wide transition-all border-b-2 -mb-[2px]" :class="selectedCategory === category.slug
-                    ? 'border-[#7651a5] font-medium text-[#29251f]'
-                    : 'border-transparent text-[#82796f] hover:text-[#655c52]'">
-                {{ category.name }}
-            </Link>
-        </div>
-    </nav>
-
-    <section class="mx-auto max-w-7xl space-y-20 px-6 py-16 lg:px-10">
+    <section v-else class="mx-auto max-w-7xl space-y-20 px-6 py-16 lg:px-10">
+        <Link :href="route('salon.services')" class="text-sm text-[#8b6842]">All
+            categories</Link>
         <div v-for="category in categories" :key="category.id">
             <div class="flex flex-wrap items-end justify-between gap-4 border-b border-[#e4dbcf] pb-5">
                 <div>
@@ -63,9 +64,9 @@ const selectedCategory = computed(() => {
                     <h2 class="mt-3 font-serif text-3xl md:text-4xl">{{ category.name }}</h2>
                 </div>
                 <p v-if="category.description" class="max-w-md text-sm leading-6 text-[#82796f]">{{ category.description
-                    }}</p>
+                }}</p>
             </div>
-            <div class="mt-7 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div class="mt-7 grid gap-6 sm:grid-cols-4 grid-col-2">
                 <article v-for="service in category.services" :key="service.id" class="group bg-white">
                     <Link :href="route('salon.service', service.slug)" class="block">
                         <div class="aspect-[4/3] overflow-hidden bg-[#e8dfd3]"><img v-if="service.image_url"
@@ -85,8 +86,8 @@ const selectedCategory = computed(() => {
                 <p v-if="category.services.length === 0" class="text-sm text-[#82796f]">New rituals are coming soon.</p>
             </div>
         </div>
-        <div v-if="categories.length === 0" class="py-16 text-center text-sm text-[#82796f]">Our menu is being
-            refreshed. Please check back soon.</div>
+        <div v-if="categories.length === 0" class="py-16 text-center text-sm text-[#82796f]">No services in this
+            category yet.</div>
     </section>
 
     <section class="bg-[#29251f] px-6 py-16 text-center text-white">

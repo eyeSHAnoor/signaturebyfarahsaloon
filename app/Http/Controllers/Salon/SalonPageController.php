@@ -33,9 +33,18 @@ class SalonPageController extends Controller
 
     public function services(Request $request): Response
     {
-        $categories = ServiceCategory::query()->where('active', true)->orderBy('sort_order')->with([
+        $categories = ServiceCategory::query()->where('active', true)->orderBy('sort_order')->withCount([
+            'services' => fn ($query) => $query->where('active', true),
+        ])->with([
             'services' => fn ($query) => $query->where('active', true)->orderBy('name'),
         ])->get();
+        $categoryCards = $categories->map(fn (ServiceCategory $category) => [
+            'id' => $category->id,
+            'name' => $category->name,
+            'slug' => $category->slug,
+            'image_url' => $category->image_url,
+            'services_count' => $category->services_count,
+        ]);
         $categorySlug = $request->query('category');
 
         if (is_string($categorySlug) && $categories->contains('slug', $categorySlug)) {
@@ -44,6 +53,7 @@ class SalonPageController extends Controller
 
         return Inertia::render('salon/Services', [
             'categories' => $categories,
+            'categoryCards' => $categoryCards,
         ]);
     }
 
